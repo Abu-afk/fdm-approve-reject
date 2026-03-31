@@ -196,6 +196,6 @@ Any pre-approval state → WITHDRAWN
 # backend/.env
 DATABASE_URL="postgresql://postgres:password@localhost:5432/fdm_expenses"
 JWT_SECRET="change-this-to-a-long-random-string"
-PORT=5000
+PORT=5001
 FRONTEND_URL="http://localhost:3000"
 ```
