@@ -1,0 +1,123 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  EMPLOYEE
+  LINE_MANAGER
+  FINANCE_OFFICER
+}
+
+enum ClaimStatus {
+  DRAFT
+  SUBMITTED
+  CHANGES_REQUESTED
+  APPROVED
+  REJECTED
+  PAID
+  WITHDRAWN
+}
+
+enum DecisionType {
+  APPROVED
+  REJECTED
+  CHANGES_REQUESTED
+}
+
+model Employee {
+  employeeId     String             @id @default(cuid())
+  fullName       String
+  email          String             @unique
+  passwordHash   String
+  role           Role               @default(EMPLOYEE)
+  costCentre     String
+  createdAt      DateTime           @default(now())
+  claims         ExpenseClaim[]     @relation("EmployeeClaims")
+  decisions      ApprovalDecision[]
+  reimbursements Reimbursement[]
+}
+
+model ExpenseClaim {
+  claimId         String             @id @default(cuid())
+  createdAt       DateTime           @default(now())
+  submittedAt     DateTime?
+  status          ClaimStatus        @default(DRAFT)
+  totalAmount     Float              @default(0)
+  currency        String             @default("GBP")
+  employeeComment String?
+  managerComment  String?
+  financeComment  String?
+  employeeId      String
+  employee        Employee           @relation("EmployeeClaims", fields: [employeeId], references: [employeeId])
+  items           ExpenseItem[]
+  decisions       ApprovalDecision[]
+  reimbursement   Reimbursement?
+  auditLogs       AuditLog[]
+}
+
+model ExpenseItem {
+  itemId       String       @id @default(cuid())
+  dateIncurred DateTime
+  category     String
+  description  String
+  amount       Float
+  currency     String       @default("GBP")
+  vatAmount    Float        @default(0)
+  merchant     String
+  claimId      String
+  claim        ExpenseClaim @relation(fields: [claimId], references: [claimId], onDelete: Cascade)
+  receipts     Receipt[]
+}
+
+model Receipt {
+  receiptId      String      @id @default(cuid())
+  fileName       String
+  fileType       String
+  filePath       String
+  uploadDate     DateTime    @default(now())
+  vatNumber      String?
+  totalOnReceipt Float?
+  itemId         String
+  item           ExpenseItem @relation(fields: [itemId], references: [itemId], onDelete: Cascade)
+}
+
+model ApprovalDecision {
+  decisionId   String       @id @default(cuid())
+  decisionType DecisionType
+  decidedAt    DateTime     @default(now())
+  comment      String?
+  claimId      String
+  claim        ExpenseClaim @relation(fields: [claimId], references: [claimId])
+  managerId    String
+  manager      Employee     @relation(fields: [managerId], references: [employeeId])
+}
+
+model Reimbursement {
+  reimbursementId  String       @id @default(cuid())
+  processedAt      DateTime     @default(now())
+  paidAt           DateTime?
+  paymentReference String?
+  amountPaid       Float
+  currency         String       @default("GBP")
+  claimId          String       @unique
+  claim            ExpenseClaim @relation(fields: [claimId], references: [claimId])
+  financeOfficerId String
+  financeOfficer   Employee     @relation(fields: [financeOfficerId], references: [employeeId])
+}
+
+model AuditLog {
+  logId     String      @id @default(cuid())
+  timestamp DateTime    @default(now())
+  action    String
+  oldStatus ClaimStatus?
+  newStatus ClaimStatus?
+  actorId   String
+  comment   String?
+  claimId   String
+  claim     ExpenseClaim @relation(fields: [claimId], references: [claimId])
+}

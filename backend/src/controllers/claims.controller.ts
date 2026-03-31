@@ -1,0 +1,171 @@
+import { Response } from 'express';
+import { AuthRequest } from '../middleware/auth';
+import * as claimsService from '../services/claims.service';
+import prisma from '../lib/prisma';
+
+export async function getMyClaims(req: AuthRequest, res: Response): Promise<void> {
+  try {
+    const claims = await claimsService.getEmployeeClaims(req.user!.employeeId);
+    res.json(claims);
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Error fetching claims';
+    res.status(400).json({ error: message });
+  }
+}
+
+export async function createClaim(req: AuthRequest, res: Response): Promise<void> {
+  try {
+    const claim = await claimsService.createClaim(req.user!.employeeId, req.body);
+    res.status(201).json(claim);
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Error creating claim';
+    res.status(400).json({ error: message });
+  }
+}
+
+export async function getClaim(req: AuthRequest, res: Response): Promise<void> {
+  try {
+    const claim = await claimsService.getClaimById(req.params.claimId, req.user!.employeeId);
+    res.json(claim);
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Claim not found';
+    res.status(404).json({ error: message });
+  }
+}
+
+export async function updateClaim(req: AuthRequest, res: Response): Promise<void> {
+  try {
+    const claim = await claimsService.updateClaim(
+      req.params.claimId,
+      req.user!.employeeId,
+      req.body
+    );
+    res.json(claim);
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Error updating claim';
+    res.status(400).json({ error: message });
+  }
+}
+
+export async function submitClaim(req: AuthRequest, res: Response): Promise<void> {
+  try {
+    await claimsService.submitClaim(req.params.claimId, req.user!.employeeId);
+    res.json({ message: 'Claim submitted successfully' });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Error submitting claim';
+    res.status(400).json({ error: message });
+  }
+}
+
+export async function withdrawClaim(req: AuthRequest, res: Response): Promise<void> {
+  try {
+    await claimsService.withdrawClaim(req.params.claimId, req.user!.employeeId);
+    res.json({ message: 'Claim withdrawn' });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Error withdrawing claim';
+    res.status(400).json({ error: message });
+  }
+}
+
+export async function deleteClaim(req: AuthRequest, res: Response): Promise<void> {
+  try {
+    await claimsService.deleteClaim(req.params.claimId, req.user!.employeeId);
+    res.json({ message: 'Claim deleted' });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Error deleting claim';
+    res.status(400).json({ error: message });
+  }
+}
+
+export async function addItem(req: AuthRequest, res: Response): Promise<void> {
+  try {
+    const item = await claimsService.addItem(
+      req.params.claimId,
+      req.user!.employeeId,
+      req.body
+    );
+    res.status(201).json(item);
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Error adding item';
+    res.status(400).json({ error: message });
+  }
+}
+
+export async function updateItem(req: AuthRequest, res: Response): Promise<void> {
+  try {
+    const item = await claimsService.updateItem(
+      req.params.itemId,
+      req.user!.employeeId,
+      req.body
+    );
+    res.json(item);
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Error updating item';
+    res.status(400).json({ error: message });
+  }
+}
+
+export async function deleteItem(req: AuthRequest, res: Response): Promise<void> {
+  try {
+    await claimsService.deleteItem(req.params.itemId, req.user!.employeeId);
+    res.json({ message: 'Item deleted' });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Error deleting item';
+    res.status(400).json({ error: message });
+  }
+}
+
+export async function uploadReceipt(req: AuthRequest, res: Response): Promise<void> {
+  try {
+    if (!req.file) {
+      res.status(400).json({ error: 'No file uploaded' });
+      return;
+    }
+    const item = await prisma.expenseItem.findFirst({
+      where: { itemId: req.params.itemId },
+      include: { claim: true },
+    });
+    if (!item || item.claim.employeeId !== req.user!.employeeId) {
+      res.status(404).json({ error: 'Item not found' });
+      return;
+    }
+    if (!['DRAFT', 'CHANGES_REQUESTED'].includes(item.claim.status)) {
+      res.status(400).json({ error: 'Cannot upload receipts in this claim status' });
+      return;
+    }
+    const receipt = await prisma.receipt.create({
+      data: {
+        itemId: req.params.itemId,
+        fileName: req.file.originalname,
+        fileType: req.file.mimetype,
+        filePath: req.file.path,
+        vatNumber: req.body.vatNumber || null,
+        totalOnReceipt: req.body.totalOnReceipt
+          ? parseFloat(req.body.totalOnReceipt)
+          : null,
+      },
+    });
+    res.status(201).json(receipt);
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Error uploading receipt';
+    res.status(400).json({ error: message });
+  }
+}
+
+export async function deleteReceipt(req: AuthRequest, res: Response): Promise<void> {
+  try {
+    const receipt = await prisma.receipt.findFirst({
+      where: { receiptId: req.params.receiptId },
+      include: { item: { include: { claim: true } } },
+    });
+    if (!receipt || receipt.item.claim.employeeId !== req.user!.employeeId) {
+      res.status(404).json({ error: 'Receipt not found' });
+      return;
+    }
+    await prisma.receipt.delete({ where: { receiptId: req.params.receiptId } });
+    res.json({ message: 'Receipt deleted' });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Error deleting receipt';
+    res.status(400).json({ error: message });
+  }
+}
