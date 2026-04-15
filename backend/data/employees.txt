@@ -5,8 +5,10 @@
     "email": "employee@fdm.com",
     "passwordHash": "$2a$10$7AVKEeae7sdljXmRKvAJI.myn6B7Nwe.Q6QHauPugagTgryCw5aVa",
     "role": "EMPLOYEE",
+    "managerId": "c883b446-21b7-4914-94f9-7bd145f0aa3a",
     "costCentre": "CC-001",
     "createdAt": "2026-04-14T21:46:47.370Z"
+
   },
   {
     "employeeId": "c883b446-21b7-4914-94f9-7bd145f0aa3a",

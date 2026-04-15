@@ -22,6 +22,9 @@ export interface Employee {
   passwordHash: string;
   role: Role;
   costCentre: string;
+
+  managerId?: string; 
+
   createdAt: string;
 }
 
@@ -90,6 +93,15 @@ export interface AuditLog {
   newStatus: ClaimStatus;
   comment: string | null;
   timestamp: string;
+}
+
+export interface Notification {
+  notificationId: string;
+  recipientId: string;
+  message: string;
+  isRead: boolean;
+  createdAt: string;
+  claimId?: string; 
 }
 
 // ── File I/O ─────────────────────────────────────────────────────────────────
@@ -234,4 +246,29 @@ export const db = {
       return log;
     },
   },
+
+  notifications: {
+  all: () => read<Notification>('notifications.txt'),
+
+  byRecipient: (recipientId: string) =>
+    read<Notification>('notifications.txt').filter((n) => n.recipientId === recipientId),
+
+  insert: (notification: Notification): Notification => {
+    write('notifications.txt', [
+      ...read<Notification>('notifications.txt'),
+      notification,
+    ]);
+    return notification;
+  },
+
+  markAsRead: (notificationId: string): Notification | null => {
+    const list = read<Notification>('notifications.txt');
+    const idx = list.findIndex((n) => n.notificationId === notificationId);
+    if (idx === -1) return null;
+
+    list[idx].isRead = true;
+    write('notifications.txt', list);
+    return list[idx];
+  },
+},
 };

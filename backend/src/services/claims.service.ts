@@ -83,25 +83,34 @@ export async function updateClaim(
 export async function submitClaim(claimId: string, employeeId: string) {
   const claim = db.claims.byId(claimId);
   if (!claim || claim.employeeId !== employeeId) throw new Error('Claim not found');
+
   if (!['DRAFT', 'CHANGES_REQUESTED'].includes(claim.status)) {
     throw new Error('Cannot submit a claim in its current status');
   }
+
   const items = db.items.byClaim(claimId);
   if (items.length === 0) {
     throw new Error('Claim must have at least one expense item before submission');
   }
-  const itemWithoutReceipt = items.find((item) => db.receipts.byItem(item.itemId).length === 0);
+
+  const itemWithoutReceipt = items.find(
+    (item) => db.receipts.byItem(item.itemId).length === 0
+  );
   if (itemWithoutReceipt) {
     throw new Error(`Expense item "${itemWithoutReceipt.description}" is missing a receipt`);
   }
+
   const total = items.reduce((sum, item) => sum + item.amount, 0);
   const oldStatus = claim.status;
 
+  // ✅ Update claim
   db.claims.update(claimId, {
     status: 'SUBMITTED',
     submittedAt: new Date().toISOString(),
     totalAmount: total,
   });
+
+  // ✅ Audit log
   db.auditlogs.insert({
     logId: newId(),
     claimId,
@@ -112,6 +121,27 @@ export async function submitClaim(claimId: string, employeeId: string) {
     comment: null,
     timestamp: new Date().toISOString(),
   });
+
+  // 🔔 NOTIFICATION LOGIC
+  const employee = db.employees.byId(employeeId);
+  if (!employee) return;
+
+  const manager = employee.managerId
+    ? db.employees.byId(employee.managerId)
+    : null;
+
+  if (manager) {
+    // In-app notification
+    db.notifications.insert({
+      notificationId: newId(),
+      recipientId: manager.employeeId,
+      message: `New expense claim submitted by ${employee.fullName}`,
+      isRead: false,
+      createdAt: new Date().toISOString(),
+      claimId: claimId, // 👈 IMPORTANT
+    });
+   
+  }
 }
 
 export async function withdrawClaim(claimId: string, employeeId: string) {

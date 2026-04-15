@@ -29,9 +29,13 @@ function fullClaimForReview(claimId: string) {
   };
 }
 
-export async function getPendingClaims() {
+export async function getPendingClaims(managerId: string) {
   return db.claims
     .byStatus('SUBMITTED')
+    .filter((claim) => {
+      const employee = db.employees.byId(claim.employeeId);
+      return employee?.managerId === managerId;
+    })
     .sort((a, b) => {
       const aTime = a.submittedAt ? new Date(a.submittedAt).getTime() : 0;
       const bTime = b.submittedAt ? new Date(b.submittedAt).getTime() : 0;
@@ -40,28 +44,50 @@ export async function getPendingClaims() {
     .map((claim) => {
       const employee = db.employees.byId(claim.employeeId);
       const items = db.items.byClaim(claim.claimId);
+
       return {
         ...claim,
         employee: employee
-          ? { fullName: employee.fullName, email: employee.email, costCentre: employee.costCentre }
+          ? {
+              fullName: employee.fullName,
+              email: employee.email,
+              costCentre: employee.costCentre,
+            }
           : null,
         items,
       };
     });
 }
 
-export async function getClaimForReview(claimId: string) {
+export async function getClaimForReview(claimId: string, managerId: string) {
+  const claim = db.claims.byId(claimId);
+  if (!claim) throw new Error('Claim not found');
+
+  const employee = db.employees.byId(claim.employeeId);
+
+  if (!employee || employee.managerId !== managerId) {
+    throw new Error('Unauthorized');
+  }
+
   const result = fullClaimForReview(claimId);
-  if (!result) throw new Error('Claim not found');
   return result;
 }
 
 export async function approveClaim(claimId: string, managerId: string, comment?: string) {
   const claim = db.claims.byId(claimId);
   if (!claim) throw new Error('Claim not found');
-  if (claim.status !== 'SUBMITTED') throw new Error('Only submitted claims can be approved');
+
+  const employee = db.employees.byId(claim.employeeId);
+  if (!employee || employee.managerId !== managerId) {
+    throw new Error('Unauthorized');
+  }
+
+  if (claim.status !== 'SUBMITTED') {
+    throw new Error('Only submitted claims can be approved');
+  }
 
   db.claims.update(claimId, { status: 'APPROVED', managerComment: comment ?? null });
+
   db.decisions.insert({
     decisionId: newId(),
     claimId,
@@ -70,6 +96,7 @@ export async function approveClaim(claimId: string, managerId: string, comment?:
     decidedAt: new Date().toISOString(),
     comment: comment ?? null,
   });
+
   db.auditlogs.insert({
     logId: newId(),
     claimId,
@@ -86,6 +113,10 @@ export async function rejectClaim(claimId: string, managerId: string, comment: s
   const claim = db.claims.byId(claimId);
   if (!claim) throw new Error('Claim not found');
   if (claim.status !== 'SUBMITTED') throw new Error('Only submitted claims can be rejected');
+  const employee = db.employees.byId(claim.employeeId);
+  if (!employee || employee.managerId !== managerId) {
+    throw new Error('Unauthorized');
+  }
 
   db.claims.update(claimId, { status: 'REJECTED', managerComment: comment });
   db.decisions.insert({

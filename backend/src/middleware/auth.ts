@@ -7,6 +7,7 @@ export interface AuthRequest extends Request {
 
 export function authenticate(req: AuthRequest, res: Response, next: NextFunction): void {
   const authHeader = req.headers.authorization;
+  
   if (!authHeader?.startsWith('Bearer ')) {
     res.status(401).json({ error: 'Unauthorized' });
     return;

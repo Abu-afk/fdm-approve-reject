@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: 'http://localhost:5000/api',
 });
 
 api.interceptors.request.use((config) => {
@@ -99,5 +99,13 @@ export const processReimbursement = (
   claimId: string,
   data: { paymentReference?: string; financeComment?: string }
 ) => api.post(`/finance/claims/${claimId}/reimburse`, data);
+
+
+// Notifications
+export const getNotifications = () =>
+  api.get('/notifications');
+
+export const markNotificationAsRead = (id: string) =>
+  api.patch(`/notifications/${id}/read`);
 
 export default api;
