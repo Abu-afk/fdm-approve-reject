@@ -9,11 +9,18 @@ const fmt = (n: number, currency = 'GBP') =>
   new Intl.NumberFormat('en-GB', { style: 'currency', currency }).format(n);
 const fmtDate = (d: string) => new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 
+function getStartOfWeek() {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  d.setDate(d.getDate() - d.getDay());
+  return d;
+}
+
 export default function Dashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [claims, setClaims] = useState<ExpenseClaim[]>([]);
-  const [pendingCount, setPendingCount] = useState<number | null>(null);
+  const [pendingClaims, setPendingClaims] = useState<ExpenseClaim[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -24,8 +31,8 @@ export default function Dashboard() {
         if (user?.role === 'LINE_MANAGER' || user?.role === 'FINANCE_OFFICER') {
           try {
             const mgrRes = await api.getManagerPendingClaims();
-            setPendingCount(mgrRes.data.length);
-          } catch { setPendingCount(0); }
+            setPendingClaims(mgrRes.data);
+          } catch { setPendingClaims([]); }
         }
       } catch {
         // silently fail
@@ -41,12 +48,22 @@ export default function Dashboard() {
   const drafts = claims.filter(c => c.status === 'DRAFT').length;
   const recentClaims = [...claims].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 5);
 
+  // Weekly summary for managers
+  const weekStart = getStartOfWeek();
+  const allManagerClaims = [...pendingClaims];
+  const weeklyApproved = allManagerClaims.filter(c => c.status === 'APPROVED' && new Date(c.submittedAt || c.createdAt) >= weekStart).length;
+  const weeklyRejected = allManagerClaims.filter(c => c.status === 'REJECTED' && new Date(c.submittedAt || c.createdAt) >= weekStart).length;
+  const weeklyPending = pendingClaims.length;
+  const weeklyTotal = pendingClaims.reduce((s, c) => s + c.totalAmount, 0);
+
   const greet = () => {
     const h = new Date().getHours();
     if (h < 12) return 'Good morning';
     if (h < 17) return 'Good afternoon';
     return 'Good evening';
   };
+
+  const isManager = user?.role === 'LINE_MANAGER' || user?.role === 'FINANCE_OFFICER';
 
   return (
     <>
@@ -57,6 +74,41 @@ export default function Dashboard() {
         </h1>
         <p className="text-muted">Here's an overview of your expense activity.</p>
       </div>
+
+      {/* Manager Weekly Summary */}
+      {isManager && !loading && (
+        <div className="card" style={{ marginBottom: 24, borderLeft: '4px solid #00D600' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+            <div>
+              <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--grey-900)' }}>📊 Claims Summary — This Week</div>
+              <div style={{ fontSize: 12, color: 'var(--grey-400)', marginTop: 2 }}>
+                Week starting {weekStart.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+              </div>
+            </div>
+            <Link to="/manager/claims" style={{ fontSize: 13, color: 'var(--green-600)', fontWeight: 600, textDecoration: 'none' }}>
+              View all →
+            </Link>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12 }}>
+            <div style={{ background: '#fff3cd', borderRadius: 10, padding: '14px 16px' }}>
+              <div style={{ fontSize: 26, fontWeight: 800, color: '#856404' }}>{weeklyPending}</div>
+              <div style={{ fontSize: 12, fontWeight: 600, color: '#856404', marginTop: 2 }}>⏳ Pending Review</div>
+            </div>
+            <div style={{ background: '#d1e7dd', borderRadius: 10, padding: '14px 16px' }}>
+              <div style={{ fontSize: 26, fontWeight: 800, color: '#0f5132' }}>{weeklyApproved}</div>
+              <div style={{ fontSize: 12, fontWeight: 600, color: '#0f5132', marginTop: 2 }}>✅ Approved</div>
+            </div>
+            <div style={{ background: '#f8d7da', borderRadius: 10, padding: '14px 16px' }}>
+              <div style={{ fontSize: 26, fontWeight: 800, color: '#842029' }}>{weeklyRejected}</div>
+              <div style={{ fontSize: 12, fontWeight: 600, color: '#842029', marginTop: 2 }}>❌ Rejected</div>
+            </div>
+            <div style={{ background: '#e8f5e9', borderRadius: 10, padding: '14px 16px' }}>
+              <div style={{ fontSize: 22, fontWeight: 800, color: '#1b5e20' }}>{fmt(weeklyTotal)}</div>
+              <div style={{ fontSize: 12, fontWeight: 600, color: '#1b5e20', marginTop: 2 }}>💰 Value Pending</div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Stats */}
       <div className="stat-grid">
@@ -80,10 +132,10 @@ export default function Dashboard() {
           <div className="stat-card-value" style={{ fontSize: 18 }}>{loading ? '—' : fmt(totalAmount)}</div>
           <div className="stat-card-label">Total Reimbursed</div>
         </div>
-        {(user?.role === 'LINE_MANAGER' || user?.role === 'FINANCE_OFFICER') && (
-          <div className="stat-card" style={{ borderColor: pendingCount ? 'var(--amber-500)' : undefined }}>
+        {isManager && (
+          <div className="stat-card" style={{ borderColor: pendingClaims.length ? 'var(--amber-500)' : undefined }}>
             <div className="stat-card-icon amber">🔍</div>
-            <div className="stat-card-value">{pendingCount ?? '—'}</div>
+            <div className="stat-card-value">{loading ? '—' : pendingClaims.length}</div>
             <div className="stat-card-label">Claims Needing Review</div>
           </div>
         )}
@@ -98,10 +150,10 @@ export default function Dashboard() {
         <Link to="/employee/claims" className="quick-action-btn">
           <span className="qa-icon">📋</span> View My Claims
         </Link>
-        {(user?.role === 'LINE_MANAGER' || user?.role === 'FINANCE_OFFICER') && (
+        {isManager && (
           <Link to="/manager/claims" className="quick-action-btn">
             <span className="qa-icon">🔍</span> Review Pending
-            {pendingCount ? <span className="sidebar-badge">{pendingCount}</span> : null}
+            {pendingClaims.length ? <span className="sidebar-badge">{pendingClaims.length}</span> : null}
           </Link>
         )}
         {user?.role === 'FINANCE_OFFICER' && (
