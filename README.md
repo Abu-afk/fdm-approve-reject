@@ -10,7 +10,7 @@ A full-stack expense management system for FDM Group employees to submit, review
 |-------|-----------|
 | Frontend | React 18 + TypeScript + Vite |
 | Backend | Node.js + Express + TypeScript |
-| Database | PostgreSQL + Prisma ORM |
+| Database | Flat-file JSON (no DB install required) |
 | Auth | JWT (8h expiry) |
 | File uploads | Multer (local, `backend/uploads/`) |
 
@@ -21,16 +21,21 @@ A full-stack expense management system for FDM Group employees to submit, review
 ```
 FDM/
 ├── backend/
-│   ├── prisma/
-│   │   ├── schema.prisma     # Data model
-│   │   └── seed.ts           # Demo users
+│   ├── data/                 # Flat-file JSON storage (auto-created)
+│   │   ├── employees.txt     # Seeded demo users
+│   │   ├── claims.txt
+│   │   ├── items.txt
+│   │   ├── receipts.txt
+│   │   ├── decisions.txt
+│   │   ├── reimbursements.txt
+│   │   └── auditlogs.txt
 │   ├── src/
 │   │   ├── controllers/      # HTTP handlers
 │   │   ├── services/         # Business logic
 │   │   ├── routes/           # Express routers
 │   │   ├── middleware/       # Auth, error handler
 │   │   ├── utils/            # JWT helpers
-│   │   ├── lib/prisma.ts     # Prisma client singleton
+│   │   ├── lib/db.ts         # Flat-file database layer
 │   │   └── index.ts          # App entry point
 │   ├── .env.example
 │   ├── package.json
@@ -58,21 +63,12 @@ FDM/
 ### Prerequisites
 
 - Node.js 18+
-- PostgreSQL running locally (default port 5432)
+
+No database installation required — data is stored in `backend/data/*.txt` files.
 
 ---
 
-### 1. Database
-
-Create a PostgreSQL database:
-
-```sql
-CREATE DATABASE fdm_expenses;
-```
-
----
-
-### 2. Backend
+### 1. Backend
 
 ```bash
 cd backend
@@ -82,15 +78,9 @@ npm install
 
 # Copy and configure environment
 cp .env.example .env
-# Edit .env — set DATABASE_URL and JWT_SECRET
+# Edit .env — set JWT_SECRET (DATABASE_URL is no longer needed)
 
-# Push schema to database
-npm run db:push
-
-# Seed demo users
-npm run db:seed
-
-# Start dev server (port 5000)
+# Start dev server (port 5001)
 npm run dev
 ```
 
@@ -194,7 +184,6 @@ Any pre-approval state → WITHDRAWN
 
 ```env
 # backend/.env
-DATABASE_URL="postgresql://postgres:password@localhost:5432/fdm_expenses"
 JWT_SECRET="change-this-to-a-long-random-string"
 PORT=5001
 FRONTEND_URL="http://localhost:3000"
@@ -203,7 +192,8 @@ FRONTEND_URL="http://localhost:3000"
 
 ### Prerequisites
 - [Node.js](https://nodejs.org/) (v18+)
-- [PostgreSQL](https://www.postgresql.org/) running locally
+
+No database setup needed.
 
 ### Installation
 
@@ -220,7 +210,6 @@ FRONTEND_URL="http://localhost:3000"
 ```
    Create a `.env` file in the `backend/` folder:
 ```
-   DATABASE_URL="postgresql://postgres:password@localhost:5432/fdm_expenses"
    JWT_SECRET="change-this-to-a-long-random-string"
    PORT=5001
    FRONTEND_URL="http://localhost:3000"
