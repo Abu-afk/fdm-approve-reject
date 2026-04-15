@@ -1,4 +1,6 @@
-# FDM Expenses App
+<p align="center">
+  <img src="assets/banner.svg" alt="FDM Expenses" width="860"/>
+</p>
 
 A full-stack expense management system for FDM Group employees to submit, review, and process expense claims.
 
@@ -157,15 +159,9 @@ All accounts use password: **`password123`**
 
 ## Claim Lifecycle
 
-```
-DRAFT → SUBMITTED → APPROVED → PAID
-           ↓              ↑
-     CHANGES_REQUESTED ───┘
-           ↓
-        REJECTED
-           
-Any pre-approval state → WITHDRAWN
-```
+<p align="center">
+  <img src="assets/lifecycle.svg" alt="Claim Lifecycle" width="860"/>
+</p>
 
 ---
 

@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 220" width="860" height="220">
+  <defs>
+    <linearGradient id="bg2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f172a"/>
+      <stop offset="100%" style="stop-color:#1e293b"/>
+    </linearGradient>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#475569"/>
+    </marker>
+    <marker id="arrow-green" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#22c55e"/>
+    </marker>
+    <marker id="arrow-red" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#f87171"/>
+    </marker>
+    <marker id="arrow-yellow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#fbbf24"/>
+    </marker>
+    <marker id="arrow-gray" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#64748b"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="860" height="220" rx="12" fill="url(#bg2)"/>
+
+  <!-- Title -->
+  <text x="30" y="34" font-family="'Segoe UI', system-ui, sans-serif" font-size="13" font-weight="600" fill="#94a3b8" letter-spacing="1" text-transform="uppercase">CLAIM LIFECYCLE</text>
+
+  <!-- ── Main happy path nodes (y=100) ── -->
+
+  <!-- DRAFT -->
+  <rect x="30" y="74" width="80" height="34" rx="8" fill="#1e293b" stroke="#475569" stroke-width="1.5"/>
+  <text x="70" y="96" font-family="'Segoe UI', system-ui, sans-serif" font-size="12" fill="#94a3b8" text-anchor="middle">DRAFT</text>
+
+  <!-- SUBMITTED -->
+  <rect x="175" y="74" width="96" height="34" rx="8" fill="#1e3a5f" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="223" y="96" font-family="'Segoe UI', system-ui, sans-serif" font-size="12" fill="#60a5fa" text-anchor="middle">SUBMITTED</text>
+
+  <!-- APPROVED -->
+  <rect x="340" y="74" width="96" height="34" rx="8" fill="#1a3d2b" stroke="#22c55e" stroke-width="1.5"/>
+  <text x="388" y="96" font-family="'Segoe UI', system-ui, sans-serif" font-size="12" fill="#22c55e" text-anchor="middle">APPROVED</text>
+
+  <!-- PAID -->
+  <rect x="510" y="74" width="80" height="34" rx="8" fill="#1a3d2b" stroke="#4ade80" stroke-width="2"/>
+  <text x="550" y="96" font-family="'Segoe UI', system-ui, sans-serif" font-size="12" font-weight="700" fill="#4ade80" text-anchor="middle">PAID</text>
+
+  <!-- ── Arrows: main path ── -->
+  <line x1="110" y1="91" x2="171" y2="91" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="271" y1="91" x2="336" y2="91" stroke="#22c55e" stroke-width="1.5" marker-end="url(#arrow-green)"/>
+  <line x1="436" y1="91" x2="506" y2="91" stroke="#22c55e" stroke-width="1.5" marker-end="url(#arrow-green)"/>
+
+  <!-- ── CHANGES_REQUESTED (below SUBMITTED) ── -->
+  <rect x="162" y="158" width="122" height="34" rx="8" fill="#2d2a1e" stroke="#fbbf24" stroke-width="1.5"/>
+  <text x="223" y="180" font-family="'Segoe UI', system-ui, sans-serif" font-size="11" fill="#fbbf24" text-anchor="middle">CHANGES REQUESTED</text>
+
+  <!-- SUBMITTED → CHANGES_REQUESTED (down) -->
+  <line x1="223" y1="108" x2="223" y2="154" stroke="#fbbf24" stroke-width="1.5" marker-end="url(#arrow-yellow)"/>
+  <!-- CHANGES_REQUESTED → SUBMITTED (back up, offset) -->
+  <path d="M 245,154 Q 270,128 271,108" fill="none" stroke="#fbbf24" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#arrow-yellow)"/>
+
+  <!-- ── REJECTED (below CHANGES_REQUESTED) ── -->
+  <rect x="174" y="195" width="100" height="0" rx="0" fill="none"/>
+  <!-- CHANGES_REQUESTED → REJECTED label -->
+  <rect x="340" y="158" width="88" height="34" rx="8" fill="#3d1a1a" stroke="#f87171" stroke-width="1.5"/>
+  <text x="384" y="180" font-family="'Segoe UI', system-ui, sans-serif" font-size="12" fill="#f87171" text-anchor="middle">REJECTED</text>
+
+  <!-- SUBMITTED → REJECTED -->
+  <path d="M 271,100 Q 310,148 336,175" fill="none" stroke="#f87171" stroke-width="1.5" marker-end="url(#arrow-red)"/>
+
+  <!-- ── WITHDRAWN ── -->
+  <rect x="650" y="74" width="96" height="34" rx="8" fill="#2d1e2d" stroke="#a855f7" stroke-width="1.5"/>
+  <text x="698" y="96" font-family="'Segoe UI', system-ui, sans-serif" font-size="12" fill="#a855f7" text-anchor="middle">WITHDRAWN</text>
+
+  <!-- Any pre-approval → WITHDRAWN (arc from SUBMITTED) -->
+  <path d="M 223,74 Q 430,30 646,91" fill="none" stroke="#64748b" stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#arrow-gray)"/>
+  <text x="430" y="44" font-family="'Segoe UI', system-ui, sans-serif" font-size="10" fill="#64748b" text-anchor="middle">withdraw (pre-approval)</text>
+</svg>
