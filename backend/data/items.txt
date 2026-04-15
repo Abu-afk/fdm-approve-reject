@@ -1,0 +1,24 @@
+[
+  {
+    "itemId": "71d8e9e6-81c8-4dd9-84cc-c30f1a1d397e",
+    "claimId": "8c782f74-b1f4-4935-99a3-1b0f771584c2",
+    "dateIncurred": "2026-04-15",
+    "category": "Meals",
+    "description": "food",
+    "amount": 100,
+    "currency": "GBP",
+    "vatAmount": 20,
+    "merchant": "tesco"
+  },
+  {
+    "itemId": "6496c549-6ba7-4232-a329-c2f015ecc2d4",
+    "claimId": "147e8fd9-7ec0-48a8-97fc-f91e40314a2c",
+    "dateIncurred": "2026-04-15",
+    "category": "Meals",
+    "description": "askjdnask",
+    "amount": 1000.4,
+    "currency": "GBP",
+    "vatAmount": 20,
+    "merchant": "haskjdhkas"
+  }
+]

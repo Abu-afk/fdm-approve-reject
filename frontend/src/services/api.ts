@@ -100,4 +100,12 @@ export const processReimbursement = (
   data: { paymentReference?: string; financeComment?: string }
 ) => api.post(`/finance/claims/${claimId}/reimburse`, data);
 
+
+// Notifications
+export const getNotifications = () =>
+  api.get('/notifications');
+
+export const markNotificationAsRead = (id: string) =>
+  api.patch(`/notifications/${id}/read`);
+
 export default api;

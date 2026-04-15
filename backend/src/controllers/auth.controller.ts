@@ -4,6 +4,7 @@ import * as authService from '../services/auth.service';
 export async function login(req: Request, res: Response): Promise<void> {
   try {
     const { email, password } = req.body;
+    
     if (!email || !password) {
       res.status(400).json({ error: 'Email and password are required' });
       return;

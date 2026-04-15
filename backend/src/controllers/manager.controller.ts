@@ -4,7 +4,7 @@ import * as managerService from '../services/manager.service';
 
 export async function getPendingClaims(req: AuthRequest, res: Response): Promise<void> {
   try {
-    const claims = await managerService.getPendingClaims();
+    const claims = await managerService.getPendingClaims(req.user!.employeeId)
     res.json(claims);
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Error fetching claims';
@@ -14,7 +14,7 @@ export async function getPendingClaims(req: AuthRequest, res: Response): Promise
 
 export async function getClaimForReview(req: AuthRequest, res: Response): Promise<void> {
   try {
-    const claim = await managerService.getClaimForReview(req.params.claimId);
+    const claim = await managerService.getClaimForReview(req.params.claimId, req.user!.employeeId);
     res.json(claim);
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Claim not found';
