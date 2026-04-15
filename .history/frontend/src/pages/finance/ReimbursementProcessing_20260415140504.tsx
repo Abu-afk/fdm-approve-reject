@@ -65,54 +65,6 @@ const getMockClaimById = (claimId: string): ExpenseClaim => {
       }],
       reimbursement: undefined
     },
-    'CLM-002': {
-      claimId: 'CLM-002',
-      status: 'APPROVED',
-      totalAmount: 189.99,
-      currency: 'GBP',
-      createdAt: '2024-03-12T14:00:00Z',
-      submittedAt: '2024-03-12T14:20:00Z',
-      employeeComment: 'Client meeting lunch and travel',
-      managerComment: 'Approved - within policy',
-      financeComment: undefined,
-      employee: {
-        fullName: 'David Chen',
-        email: 'david.chen@fdm.com',
-        costCentre: 'CC-CON-045'
-      },
-      items: [
-        {
-          itemId: 'itm_004',
-          dateIncurred: '2024-03-11T00:00:00Z',
-          category: 'MEAL',
-          description: 'Lunch with client team',
-          merchant: 'The Ivy',
-          amount: 78.50,
-          vatAmount: 13.08,
-          currency: 'GBP',
-          receipts: [{ receiptId: 'rcp_004', fileName: 'ivy_receipt.pdf', fileType: 'pdf', filePath: '/uploads/ivy_receipt.pdf', uploadDate: '2024-03-12T14:00:00Z' }]
-        },
-        {
-          itemId: 'itm_005',
-          dateIncurred: '2024-03-11T00:00:00Z',
-          category: 'TRAVEL',
-          description: 'Underground fares',
-          merchant: 'TfL',
-          amount: 111.49,
-          vatAmount: 0,
-          currency: 'GBP',
-          receipts: [{ receiptId: 'rcp_005', fileName: 'tfl_charges.pdf', fileType: 'pdf', filePath: '/uploads/tfl_charges.pdf', uploadDate: '2024-03-12T14:10:00Z' }]
-        }
-      ],
-      decisions: [{
-        decisionId: 'dec_002',
-        decisionType: 'APPROVED',
-        decidedAt: '2024-03-13T11:00:00Z',
-        comment: 'Looks good - approved',
-        manager: { fullName: 'Sarah Lee' }
-      }],
-      reimbursement: undefined
-    },
     'CLM-003': {
       claimId: 'CLM-003',
       status: 'PAID',
@@ -156,85 +108,6 @@ const getMockClaimById = (claimId: string): ExpenseClaim => {
         amountPaid: 432.10,
         currency: 'GBP'
       }
-    },
-    'CLM-004': {
-      claimId: 'CLM-004',
-      status: 'SUBMITTED',
-      totalAmount: 98.50,
-      currency: 'GBP',
-      createdAt: '2024-03-14T09:00:00Z',
-      submittedAt: '2024-03-14T09:30:00Z',
-      employeeComment: 'Taxi receipts from client visit',
-      managerComment: undefined,
-      financeComment: undefined,
-      employee: {
-        fullName: 'Tom Wilson',
-        email: 'tom.wilson@fdm.com',
-        costCentre: 'CC-IT-089'
-      },
-      items: [
-        {
-          itemId: 'itm_007',
-          dateIncurred: '2024-03-13T00:00:00Z',
-          category: 'TAXI',
-          description: 'Airport transfer',
-          merchant: 'Addison Lee',
-          amount: 98.50,
-          vatAmount: 16.42,
-          currency: 'GBP',
-          receipts: [{ receiptId: 'rcp_007', fileName: 'taxi_receipt.pdf', fileType: 'pdf', filePath: '/uploads/taxi_receipt.pdf', uploadDate: '2024-03-14T09:15:00Z' }]
-        }
-      ],
-      decisions: [],
-      reimbursement: undefined
-    },
-    'CLM-005': {
-      claimId: 'CLM-005',
-      status: 'REJECTED',
-      totalAmount: 567.80,
-      currency: 'GBP',
-      createdAt: '2024-03-08T11:00:00Z',
-      submittedAt: '2024-03-08T11:45:00Z',
-      employeeComment: 'Conference travel and accommodation',
-      managerComment: 'Missing receipts for hotel stay',
-      financeComment: undefined,
-      employee: {
-        fullName: 'Maria Garcia',
-        email: 'maria.garcia@fdm.com',
-        costCentre: 'CC-SALES-012'
-      },
-      items: [
-        {
-          itemId: 'itm_008',
-          dateIncurred: '2024-03-07T00:00:00Z',
-          category: 'TRAVEL',
-          description: 'Flight to conference',
-          merchant: 'British Airways',
-          amount: 245.00,
-          vatAmount: 0,
-          currency: 'GBP',
-          receipts: [{ receiptId: 'rcp_008', fileName: 'flight_ticket.pdf', fileType: 'pdf', filePath: '/uploads/flight_ticket.pdf', uploadDate: '2024-03-08T11:00:00Z' }]
-        },
-        {
-          itemId: 'itm_009',
-          dateIncurred: '2024-03-07T00:00:00Z',
-          category: 'HOTEL',
-          description: 'Hotel accommodation',
-          merchant: 'Marriott',
-          amount: 322.80,
-          vatAmount: 53.80,
-          currency: 'GBP',
-          receipts: []
-        }
-      ],
-      decisions: [{
-        decisionId: 'dec_004',
-        decisionType: 'REJECTED',
-        decidedAt: '2024-03-09T14:00:00Z',
-        comment: 'Missing receipts for hotel stay - please resubmit with proper documentation',
-        manager: { fullName: 'Bob Smith' }
-      }],
-      reimbursement: undefined
     }
   };
 
@@ -258,18 +131,19 @@ export default function ProcessReimbursement() {
       if (!claimId) return;
       try {
         setLoading(true);
+        // Try API first
         const res = await api.getFinanceClaim(claimId);
         if (res.data && res.data.status) {
           setClaim(res.data);
           if (res.data.status === 'PAID') setProcessed(true);
         } else {
-          const mockClaim = getMockClaimById(claimId);
-          setClaim(mockClaim);
-          if (mockClaim.status === 'PAID') setProcessed(true);
+          // Fallback to mock data
+          setClaim(getMockClaimById(claimId));
+          if (getMockClaimById(claimId).status === 'PAID') setProcessed(true);
         }
       } catch (err) {
         console.log('API error, using mock data');
-        const mockClaim = getMockClaimById(claimId);
+        const mockClaim = getMockClaimById(claimId || 'CLM-001');
         setClaim(mockClaim);
         if (mockClaim.status === 'PAID') setProcessed(true);
       } finally {
@@ -299,47 +173,30 @@ export default function ProcessReimbursement() {
     e.preventDefault();
     if (!claim) return;
     
-    // Only allow payment for APPROVED claims
-    if (claim.status !== 'APPROVED') {
-      setError('This claim cannot be processed for payment.');
-      return;
-    }
-    
     if (window.confirm(`Process payment of ${formatMoney(claim.totalAmount, claim.currency)}?`)) {
       setProcessing(true);
       setError('');
       
+      // Try API, but if it fails, still show success for demo
       try {
         await api.processReimbursement(claim.claimId, {
           paymentReference: paymentRef.trim() || undefined,
           financeComment: notes.trim() || undefined,
         });
+        setProcessed(true);
+        setTimeout(() => {
+          navigate('/finance/claims');
+        }, 2000);
       } catch (err) {
-        console.log('API error, but updating UI for demo');
+        // API failed, but for demo we still show success
+        console.log('API error, simulating successful payment for demo');
+        setProcessed(true);
+        setTimeout(() => {
+          navigate('/finance/claims');
+        }, 2000);
+      } finally {
+        setProcessing(false);
       }
-      
-      // Update localStorage to mark this claim as PAID
-      const storedClaims = localStorage.getItem('fdm_claims');
-      if (storedClaims) {
-        const claims = JSON.parse(storedClaims);
-        const updatedClaims = claims.map((c: ExpenseClaim) => 
-          c.claimId === claim.claimId ? { ...c, status: 'PAID' as const } : c
-        );
-        localStorage.setItem('fdm_claims', JSON.stringify(updatedClaims));
-      } else {
-        // If no stored claims, create one
-        const currentClaims = getMockClaimById(claim.claimId);
-        currentClaims.status = 'PAID';
-        localStorage.setItem('fdm_claims', JSON.stringify([currentClaims]));
-      }
-      
-      setProcessed(true);
-      setClaim({ ...claim, status: 'PAID' });
-      
-      setTimeout(() => {
-        navigate('/finance/claims');
-      }, 2000);
-      setProcessing(false);
     }
   };
 
@@ -353,18 +210,10 @@ export default function ProcessReimbursement() {
 
   const approvedDecision = claim.decisions?.find(d => d.decisionType === 'APPROVED');
   const isPaid = claim.status === 'PAID';
-  const isRejected = claim.status === 'REJECTED';
-  const isPending = claim.status === 'SUBMITTED';
-  
-  const getStatusMessage = () => {
-    if (isPaid) return 'This claim has already been paid.';
-    if (isRejected) return 'This claim has been rejected and cannot be processed.';
-    if (isPending) return 'This claim is still pending manager approval.';
-    return null;
-  };
 
   return (
     <>
+      {/* Back to Dashboard button */}
       <div style={{ marginBottom: '20px' }}>
         <Link 
           to="/finance/claims" 
@@ -400,12 +249,6 @@ export default function ProcessReimbursement() {
       </div>
 
       {error && <div className="alert alert-error">{error}</div>}
-      
-      {getStatusMessage() && (
-        <div className="alert alert-warning" style={{ marginBottom: '20px' }}>
-          {getStatusMessage()}
-        </div>
-      )}
 
       {/* Claim Summary */}
       <div className="card" style={{ marginBottom: '20px' }}>
@@ -524,21 +367,6 @@ export default function ProcessReimbursement() {
             onClick={() => navigate('/finance/claims')}
             className="btn btn-primary"
             style={{ marginTop: '16px' }}
-          >
-            Return to Dashboard
-          </button>
-        </div>
-      ) : isRejected || isPending ? (
-        <div className="card" style={{ borderLeft: '4px solid #dc3545' }}>
-          <div className="section-title" style={{ color: '#842029' }}>⚠️ Cannot Process Payment</div>
-          <div className="alert alert-warning">
-            {isRejected 
-              ? 'This claim has been rejected. Please contact the employee to resubmit with correct documentation.' 
-              : 'This claim is still pending manager approval. Payment can only be processed after approval.'}
-          </div>
-          <button 
-            onClick={() => navigate('/finance/claims')}
-            className="btn btn-primary"
           >
             Return to Dashboard
           </button>

@@ -22,7 +22,41 @@ const getInitialMockClaims = (): ExpenseClaim[] => [
       email: 'alice.johnson@fdm.com',
       costCentre: 'CC-ENG-001'
     },
-    items: [],
+    items: [
+      {
+        itemId: 'itm_001',
+        dateIncurred: '2024-03-09T00:00:00Z',
+        category: 'TRAVEL',
+        description: 'Train ticket to London',
+        merchant: 'National Rail',
+        amount: 89.50,
+        vatAmount: 0,
+        currency: 'GBP',
+        receipts: [{ receiptId: 'rcp_001', fileName: 'train_ticket.pdf', fileType: 'pdf', filePath: '/uploads/train_ticket.pdf', uploadDate: '2024-03-10T12:00:00Z' }]
+      },
+      {
+        itemId: 'itm_002',
+        dateIncurred: '2024-03-09T00:00:00Z',
+        category: 'MEAL',
+        description: 'Working lunch with client',
+        merchant: 'Cafe Rouge',
+        amount: 45.00,
+        vatAmount: 7.50,
+        currency: 'GBP',
+        receipts: [{ receiptId: 'rcp_002', fileName: 'lunch_receipt.jpg', fileType: 'jpg', filePath: '/uploads/lunch_receipt.jpg', uploadDate: '2024-03-10T12:30:00Z' }]
+      },
+      {
+        itemId: 'itm_003',
+        dateIncurred: '2024-03-10T00:00:00Z',
+        category: 'TAXI',
+        description: 'Taxi to client office',
+        merchant: 'Uber',
+        amount: 111.00,
+        vatAmount: 18.50,
+        currency: 'GBP',
+        receipts: [{ receiptId: 'rcp_003', fileName: 'uber_receipt.pdf', fileType: 'pdf', filePath: '/uploads/uber_receipt.pdf', uploadDate: '2024-03-10T13:00:00Z' }]
+      }
+    ],
     decisions: [{
       decisionId: 'DEC-001',
       decisionType: 'APPROVED',
@@ -47,7 +81,30 @@ const getInitialMockClaims = (): ExpenseClaim[] => [
       email: 'david.chen@fdm.com',
       costCentre: 'CC-CON-045'
     },
-    items: [],
+    items: [
+      {
+        itemId: 'itm_004',
+        dateIncurred: '2024-03-11T00:00:00Z',
+        category: 'MEAL',
+        description: 'Lunch with client team',
+        merchant: 'The Ivy',
+        amount: 78.50,
+        vatAmount: 13.08,
+        currency: 'GBP',
+        receipts: [{ receiptId: 'rcp_004', fileName: 'ivy_receipt.pdf', fileType: 'pdf', filePath: '/uploads/ivy_receipt.pdf', uploadDate: '2024-03-12T14:00:00Z' }]
+      },
+      {
+        itemId: 'itm_005',
+        dateIncurred: '2024-03-11T00:00:00Z',
+        category: 'TRAVEL',
+        description: 'Underground fares',
+        merchant: 'TfL',
+        amount: 111.49,
+        vatAmount: 0,
+        currency: 'GBP',
+        receipts: [{ receiptId: 'rcp_005', fileName: 'tfl_charges.pdf', fileType: 'pdf', filePath: '/uploads/tfl_charges.pdf', uploadDate: '2024-03-12T14:10:00Z' }]
+      }
+    ],
     decisions: [{
       decisionId: 'DEC-002',
       decisionType: 'APPROVED',
@@ -72,7 +129,19 @@ const getInitialMockClaims = (): ExpenseClaim[] => [
       email: 'emma.brown@fdm.com',
       costCentre: 'CC-HR-023'
     },
-    items: [],
+    items: [
+      {
+        itemId: 'itm_006',
+        dateIncurred: '2024-03-04T00:00:00Z',
+        category: 'TRAINING',
+        description: 'Online course - Advanced React',
+        merchant: 'Udemy',
+        amount: 432.10,
+        vatAmount: 72.02,
+        currency: 'GBP',
+        receipts: [{ receiptId: 'rcp_006', fileName: 'udemy_receipt.pdf', fileType: 'pdf', filePath: '/uploads/udemy_receipt.pdf', uploadDate: '2024-03-05T08:30:00Z' }]
+      }
+    ],
     decisions: [{
       decisionId: 'DEC-003',
       decisionType: 'APPROVED',
@@ -104,7 +173,19 @@ const getInitialMockClaims = (): ExpenseClaim[] => [
       email: 'tom.wilson@fdm.com',
       costCentre: 'CC-IT-089'
     },
-    items: [],
+    items: [
+      {
+        itemId: 'itm_007',
+        dateIncurred: '2024-03-13T00:00:00Z',
+        category: 'TAXI',
+        description: 'Airport transfer',
+        merchant: 'Addison Lee',
+        amount: 98.50,
+        vatAmount: 16.42,
+        currency: 'GBP',
+        receipts: [{ receiptId: 'rcp_007', fileName: 'taxi_receipt.pdf', fileType: 'pdf', filePath: '/uploads/taxi_receipt.pdf', uploadDate: '2024-03-14T09:15:00Z' }]
+      }
+    ],
     decisions: [],
     reimbursement: undefined
   },
@@ -123,7 +204,30 @@ const getInitialMockClaims = (): ExpenseClaim[] => [
       email: 'maria.garcia@fdm.com',
       costCentre: 'CC-SALES-012'
     },
-    items: [],
+    items: [
+      {
+        itemId: 'itm_008',
+        dateIncurred: '2024-03-07T00:00:00Z',
+        category: 'TRAVEL',
+        description: 'Flight to conference',
+        merchant: 'British Airways',
+        amount: 245.00,
+        vatAmount: 0,
+        currency: 'GBP',
+        receipts: [{ receiptId: 'rcp_008', fileName: 'flight_ticket.pdf', fileType: 'pdf', filePath: '/uploads/flight_ticket.pdf', uploadDate: '2024-03-08T11:00:00Z' }]
+      },
+      {
+        itemId: 'itm_009',
+        dateIncurred: '2024-03-07T00:00:00Z',
+        category: 'HOTEL',
+        description: 'Hotel accommodation',
+        merchant: 'Marriott',
+        amount: 322.80,
+        vatAmount: 53.80,
+        currency: 'GBP',
+        receipts: []
+      }
+    ],
     decisions: [{
       decisionId: 'DEC-004',
       decisionType: 'REJECTED',
@@ -144,40 +248,60 @@ export default function FinanceClaimsDashboard() {
   const [activeFilter, setActiveFilter] = useState<FilterStatus>('APPROVED');
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Load claims function
-  const loadClaims = () => {
+  // Function to refresh claims (called after payment)
+  const refreshClaims = () => {
+    setLoading(true);
     const storedClaims = localStorage.getItem('fdm_claims');
     if (storedClaims) {
       setClaims(JSON.parse(storedClaims));
     } else {
       setClaims(getInitialMockClaims());
-      localStorage.setItem('fdm_claims', JSON.stringify(getInitialMockClaims()));
     }
     setLoading(false);
   };
 
-  // Initial load
+  // Listen for storage events (when payment is processed in another tab/component)
   useEffect(() => {
-    loadClaims();
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'fdm_claims' || e.key === 'fdm_payment_processed') {
+        refreshClaims();
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Also listen for custom event
+    const handleCustomEvent = () => refreshClaims();
+    window.addEventListener('claimsUpdated', handleCustomEvent);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('claimsUpdated', handleCustomEvent);
+    };
   }, []);
 
-  // Poll for changes every second (checks if localStorage was updated by process page)
   useEffect(() => {
-    const interval = setInterval(() => {
-      const storedClaims = localStorage.getItem('fdm_claims');
-      if (storedClaims) {
-        const parsedClaims = JSON.parse(storedClaims);
-        setClaims(prevClaims => {
-          // Only update if changed
-          if (JSON.stringify(prevClaims) !== JSON.stringify(parsedClaims)) {
-            return parsedClaims;
-          }
-          return prevClaims;
-        });
+    const fetchClaims = async () => {
+      try {
+        setLoading(true);
+        const res = await api.getFinanceApprovedClaims();
+        if (res.data && res.data.length > 0) {
+          setClaims(res.data);
+          localStorage.setItem('fdm_claims', JSON.stringify(res.data));
+        } else {
+          setClaims(getInitialMockClaims());
+          localStorage.setItem('fdm_claims', JSON.stringify(getInitialMockClaims()));
+        }
+      } catch (err) {
+        console.log('API error, using mock data');
+        setClaims(getInitialMockClaims());
+        localStorage.setItem('fdm_claims', JSON.stringify(getInitialMockClaims()));
+      } finally {
+        setLoading(false);
       }
-    }, 1000);
+    };
     
-    return () => clearInterval(interval);
+    fetchClaims();
   }, []);
 
   useEffect(() => {

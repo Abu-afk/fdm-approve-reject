@@ -314,32 +314,52 @@ export default function ProcessReimbursement() {
           paymentReference: paymentRef.trim() || undefined,
           financeComment: notes.trim() || undefined,
         });
+        
+        // Update the claim status in localStorage
+        const storedClaims = localStorage.getItem('fdm_claims');
+        if (storedClaims) {
+          const claims = JSON.parse(storedClaims);
+          const updatedClaims = claims.map((c: ExpenseClaim) => 
+            c.claimId === claim.claimId ? { ...c, status: 'PAID' as const } : c
+          );
+          localStorage.setItem('fdm_claims', JSON.stringify(updatedClaims));
+        }
+        
+        // Dispatch event to notify dashboard
+        window.dispatchEvent(new Event('claimsUpdated'));
+        
+        setProcessed(true);
+        setClaim({ ...claim, status: 'PAID' });
+        
+        setTimeout(() => {
+          navigate('/finance/claims');
+        }, 2000);
       } catch (err) {
-        console.log('API error, but updating UI for demo');
+        // API failed, but for demo we still show success and update localStorage
+        console.log('API error, simulating successful payment for demo');
+        
+        // Update the claim status in localStorage
+        const storedClaims = localStorage.getItem('fdm_claims');
+        if (storedClaims) {
+          const claims = JSON.parse(storedClaims);
+          const updatedClaims = claims.map((c: ExpenseClaim) => 
+            c.claimId === claim.claimId ? { ...c, status: 'PAID' as const } : c
+          );
+          localStorage.setItem('fdm_claims', JSON.stringify(updatedClaims));
+        }
+        
+        // Dispatch event to notify dashboard
+        window.dispatchEvent(new Event('claimsUpdated'));
+        
+        setProcessed(true);
+        setClaim({ ...claim, status: 'PAID' });
+        
+        setTimeout(() => {
+          navigate('/finance/claims');
+        }, 2000);
+      } finally {
+        setProcessing(false);
       }
-      
-      // Update localStorage to mark this claim as PAID
-      const storedClaims = localStorage.getItem('fdm_claims');
-      if (storedClaims) {
-        const claims = JSON.parse(storedClaims);
-        const updatedClaims = claims.map((c: ExpenseClaim) => 
-          c.claimId === claim.claimId ? { ...c, status: 'PAID' as const } : c
-        );
-        localStorage.setItem('fdm_claims', JSON.stringify(updatedClaims));
-      } else {
-        // If no stored claims, create one
-        const currentClaims = getMockClaimById(claim.claimId);
-        currentClaims.status = 'PAID';
-        localStorage.setItem('fdm_claims', JSON.stringify([currentClaims]));
-      }
-      
-      setProcessed(true);
-      setClaim({ ...claim, status: 'PAID' });
-      
-      setTimeout(() => {
-        navigate('/finance/claims');
-      }, 2000);
-      setProcessing(false);
     }
   };
 
@@ -356,6 +376,7 @@ export default function ProcessReimbursement() {
   const isRejected = claim.status === 'REJECTED';
   const isPending = claim.status === 'SUBMITTED';
   
+  // Show different messages based on claim status
   const getStatusMessage = () => {
     if (isPaid) return 'This claim has already been paid.';
     if (isRejected) return 'This claim has been rejected and cannot be processed.';
@@ -401,6 +422,7 @@ export default function ProcessReimbursement() {
 
       {error && <div className="alert alert-error">{error}</div>}
       
+      {/* Status message for non-APPROVED claims */}
       {getStatusMessage() && (
         <div className="alert alert-warning" style={{ marginBottom: '20px' }}>
           {getStatusMessage()}
@@ -440,7 +462,7 @@ export default function ProcessReimbursement() {
         )}
       </div>
 
-      {/* Manager Approval */}
+      {/* Manager Approval - Only show if there's an approval decision */}
       {approvedDecision && (
         <div className="card" style={{ marginBottom: '20px', borderLeft: '4px solid #198754' }}>
           <div className="section-title">✓ Manager Approval</div>
@@ -510,7 +532,7 @@ export default function ProcessReimbursement() {
         </div>
       </div>
 
-      {/* Payment Section */}
+      {/* Payment Section - Only show for APPROVED claims */}
       {isPaid ? (
         <div className="card" style={{ borderLeft: '4px solid #198754' }}>
           <div className="section-title" style={{ color: '#0f5132' }}>✓ Reimbursement Complete</div>

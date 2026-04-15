@@ -5,8 +5,8 @@ import { ExpenseClaim } from '../../types';
 
 type FilterStatus = 'ALL' | 'APPROVED' | 'REJECTED' | 'SUBMITTED' | 'PAID';
 
-// Complete mock data with ALL statuses
-const getInitialMockClaims = (): ExpenseClaim[] => [
+// MOCK DATA FALLBACK (only used if API fails)
+const getMockClaims = (): ExpenseClaim[] => [
   {
     claimId: 'CLM-001',
     status: 'APPROVED',
@@ -14,8 +14,8 @@ const getInitialMockClaims = (): ExpenseClaim[] => [
     currency: 'GBP',
     createdAt: '2024-03-10T10:00:00Z',
     submittedAt: '2024-03-10T10:30:00Z',
-    employeeComment: 'Business trip to London for client meeting',
-    managerComment: 'Valid expenses - approved',
+    employeeComment: 'Business trip to London',
+    managerComment: 'Valid expenses',
     financeComment: undefined,
     employee: {
       fullName: 'Alice Johnson',
@@ -27,7 +27,7 @@ const getInitialMockClaims = (): ExpenseClaim[] => [
       decisionId: 'DEC-001',
       decisionType: 'APPROVED',
       decidedAt: '2024-03-11T09:00:00Z',
-      comment: 'All receipts valid - approved',
+      comment: 'Approved',
       manager: { fullName: 'Bob Smith' }
     }],
     reimbursement: undefined
@@ -39,8 +39,8 @@ const getInitialMockClaims = (): ExpenseClaim[] => [
     currency: 'GBP',
     createdAt: '2024-03-12T14:00:00Z',
     submittedAt: '2024-03-12T14:20:00Z',
-    employeeComment: 'Client meeting lunch and travel',
-    managerComment: 'Approved - within policy',
+    employeeComment: 'Client meeting lunch',
+    managerComment: 'Approved',
     financeComment: undefined,
     employee: {
       fullName: 'David Chen',
@@ -52,7 +52,7 @@ const getInitialMockClaims = (): ExpenseClaim[] => [
       decisionId: 'DEC-002',
       decisionType: 'APPROVED',
       decidedAt: '2024-03-13T11:00:00Z',
-      comment: 'Looks good - approved',
+      comment: 'Looks good',
       manager: { fullName: 'Sarah Lee' }
     }],
     reimbursement: undefined
@@ -64,9 +64,9 @@ const getInitialMockClaims = (): ExpenseClaim[] => [
     currency: 'GBP',
     createdAt: '2024-03-05T08:00:00Z',
     submittedAt: '2024-03-05T09:00:00Z',
-    employeeComment: 'Training course materials for team',
-    managerComment: 'Approved for professional development',
-    financeComment: 'Processed via BACS transfer on 07/03/2024',
+    employeeComment: 'Training materials',
+    managerComment: 'Approved',
+    financeComment: 'Processed via BACS',
     employee: {
       fullName: 'Emma Brown',
       email: 'emma.brown@fdm.com',
@@ -77,59 +77,8 @@ const getInitialMockClaims = (): ExpenseClaim[] => [
       decisionId: 'DEC-003',
       decisionType: 'APPROVED',
       decidedAt: '2024-03-06T10:00:00Z',
-      comment: 'Approved for training - within budget',
+      comment: 'Approved',
       manager: { fullName: 'Sarah Lee' }
-    }],
-    reimbursement: {
-      reimbursementId: 'REIM-001',
-      processedAt: '2024-03-07T14:00:00Z',
-      paidAt: '2024-03-07T14:00:00Z',
-      paymentReference: 'BACS-20240307-001',
-      amountPaid: 432.10,
-      currency: 'GBP'
-    }
-  },
-  {
-    claimId: 'CLM-004',
-    status: 'SUBMITTED',
-    totalAmount: 98.50,
-    currency: 'GBP',
-    createdAt: '2024-03-14T09:00:00Z',
-    submittedAt: '2024-03-14T09:30:00Z',
-    employeeComment: 'Taxi receipts from client visit',
-    managerComment: undefined,
-    financeComment: undefined,
-    employee: {
-      fullName: 'Tom Wilson',
-      email: 'tom.wilson@fdm.com',
-      costCentre: 'CC-IT-089'
-    },
-    items: [],
-    decisions: [],
-    reimbursement: undefined
-  },
-  {
-    claimId: 'CLM-005',
-    status: 'REJECTED',
-    totalAmount: 567.80,
-    currency: 'GBP',
-    createdAt: '2024-03-08T11:00:00Z',
-    submittedAt: '2024-03-08T11:45:00Z',
-    employeeComment: 'Conference travel and accommodation',
-    managerComment: 'Missing receipts for hotel stay',
-    financeComment: undefined,
-    employee: {
-      fullName: 'Maria Garcia',
-      email: 'maria.garcia@fdm.com',
-      costCentre: 'CC-SALES-012'
-    },
-    items: [],
-    decisions: [{
-      decisionId: 'DEC-004',
-      decisionType: 'REJECTED',
-      decidedAt: '2024-03-09T14:00:00Z',
-      comment: 'Missing receipts for hotel stay - please resubmit with proper documentation',
-      manager: { fullName: 'Bob Smith' }
     }],
     reimbursement: undefined
   }
@@ -144,40 +93,25 @@ export default function FinanceClaimsDashboard() {
   const [activeFilter, setActiveFilter] = useState<FilterStatus>('APPROVED');
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Load claims function
-  const loadClaims = () => {
-    const storedClaims = localStorage.getItem('fdm_claims');
-    if (storedClaims) {
-      setClaims(JSON.parse(storedClaims));
-    } else {
-      setClaims(getInitialMockClaims());
-      localStorage.setItem('fdm_claims', JSON.stringify(getInitialMockClaims()));
-    }
-    setLoading(false);
-  };
-
-  // Initial load
   useEffect(() => {
-    loadClaims();
-  }, []);
-
-  // Poll for changes every second (checks if localStorage was updated by process page)
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const storedClaims = localStorage.getItem('fdm_claims');
-      if (storedClaims) {
-        const parsedClaims = JSON.parse(storedClaims);
-        setClaims(prevClaims => {
-          // Only update if changed
-          if (JSON.stringify(prevClaims) !== JSON.stringify(parsedClaims)) {
-            return parsedClaims;
-          }
-          return prevClaims;
-        });
+    const fetchClaims = async () => {
+      try {
+        setLoading(true);
+        const res = await api.getFinanceApprovedClaims();
+        if (res.data && res.data.length > 0) {
+          setClaims(res.data);
+        } else {
+          setClaims(getMockClaims());
+        }
+      } catch (err) {
+        console.log('API error, using mock data');
+        setClaims(getMockClaims());
+      } finally {
+        setLoading(false);
       }
-    }, 1000);
+    };
     
-    return () => clearInterval(interval);
+    fetchClaims();
   }, []);
 
   useEffect(() => {
@@ -238,11 +172,6 @@ export default function FinanceClaimsDashboard() {
     return claims.filter(c => c.status === status).length;
   };
 
-  const getActionButtonText = (status: string) => {
-    if (status === 'APPROVED') return 'Process →';
-    return 'View';
-  };
-
   if (loading) {
     return <div className="loading">Loading claims...</div>;
   }
@@ -251,6 +180,7 @@ export default function FinanceClaimsDashboard() {
     <>
       <div className="top-bar">
         <h1 className="page-title">Finance Dashboard</h1>
+        {/* Stats Cards - Made more visible */}
         <div style={{ display: 'flex', gap: '16px' }}>
           <div style={{ background: '#1e7a3e', color: 'white', padding: '8px 20px', borderRadius: '8px', textAlign: 'center' }}>
             <div style={{ fontSize: '24px', fontWeight: 'bold' }}>{getFilterCount('APPROVED')}</div>
@@ -263,6 +193,7 @@ export default function FinanceClaimsDashboard() {
         </div>
       </div>
 
+      {/* SEARCH BAR - MOVED TO TOP (right after stats) */}
       <div style={{ marginBottom: '20px' }}>
         <input
           type="text"
@@ -282,6 +213,7 @@ export default function FinanceClaimsDashboard() {
 
       {error && <div className="alert alert-error">{error}</div>}
 
+      {/* Filter Buttons */}
       <div className="filter-bar" style={{ marginBottom: '20px' }}>
         <button
           className={`filter-btn ${activeFilter === 'APPROVED' ? 'active' : ''}`}
@@ -315,6 +247,7 @@ export default function FinanceClaimsDashboard() {
         </button>
       </div>
 
+      {/* Claims Table */}
       <div className="card">
         {filteredClaims.length === 0 ? (
           <div className="empty-state">
@@ -360,7 +293,7 @@ export default function FinanceClaimsDashboard() {
                     <td>{claim.items.length}</td>
                     <td>
                       <span style={{ color: '#1e7a3e', fontSize: '12px', fontWeight: 500, cursor: 'pointer' }}>
-                        {getActionButtonText(claim.status)}
+                        {claim.status === 'APPROVED' ? 'Process →' : 'View'}
                       </span>
                     </td>
                   </tr>
