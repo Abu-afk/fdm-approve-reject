@@ -24,7 +24,7 @@ My commits are visible on both this repo and the shared group repo. To find my s
 
 ---
 
-### What I Built Approve and Reject use case: I've added these features below
+### I Built Approve and Reject use case: I've added these features below
 
 #### 1. Pending Claims — Filtering System
 **File:** `frontend/src/pages/manager/PendingClaims.tsx`
