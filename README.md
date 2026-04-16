@@ -1,236 +1,138 @@
-<p align="center">
-  <img src="assets/banner.svg" alt="FDM Expenses" width="860"/>
-</p>
+# FDM Expenses — Personal Contribution
 
-A full-stack expense management system for FDM Group employees to submit, review, and process expense claims.
-
----
-
-## Tech Stack
-
-| Layer | Technology |
-|-------|-----------|
-| Frontend | React 18 + TypeScript + Vite |
-| Backend | Node.js + Express + TypeScript |
-| Database | Flat-file JSON (no DB install required) |
-| Auth | JWT (8h expiry) |
-| File uploads | Multer (local, `backend/uploads/`) |
+## Student Information
+- **Name:** Abu Sayeed Albadry
+- **Student ID:** 230332195
+- **University:** Queen Mary University of London
+- **GitHub:** [Abu-afk](https://github.com/Abu-afk)
+- **Personal Repo:** https://github.com/Abu-afk/fdm-approve-reject
+- **Group Repo:** https://github.com/ZIZO-M/FDM-Expenses
 
 ---
 
-## Project Structure
+## My Individual Contributions
 
-```
-FDM/
-├── backend/
-│   ├── data/                 # Flat-file JSON storage (auto-created)
-│   │   ├── employees.txt     # Seeded demo users
-│   │   ├── claims.txt
-│   │   ├── items.txt
-│   │   ├── receipts.txt
-│   │   ├── decisions.txt
-│   │   ├── reimbursements.txt
-│   │   └── auditlogs.txt
-│   ├── src/
-│   │   ├── controllers/      # HTTP handlers
-│   │   ├── services/         # Business logic
-│   │   ├── routes/           # Express routers
-│   │   ├── middleware/       # Auth, error handler
-│   │   ├── utils/            # JWT helpers
-│   │   ├── lib/db.ts         # Flat-file database layer
-│   │   └── index.ts          # App entry point
-│   ├── .env.example
-│   ├── package.json
-│   └── tsconfig.json
-└── frontend/
-    ├── src/
-    │   ├── pages/
-    │   │   ├── auth/         # Login
-    │   │   ├── employee/     # MyClaims, NewClaim, EditClaim, ClaimDetails
-    │   │   ├── manager/      # PendingClaims, ClaimReview
-    │   │   └── finance/      # ApprovedClaims, ReimbursementProcessing
-    │   ├── components/       # Layout, StatusBadge, ProtectedRoute
-    │   ├── contexts/         # AuthContext
-    │   ├── services/api.ts   # Axios API layer
-    │   ├── types/index.ts    # TypeScript interfaces
-    │   └── App.tsx           # Router
-    ├── package.json
-    └── vite.config.ts
-```
+### Where to Find My Work
+My commits are visible on both this repo and the shared group repo. To find my specific work:
+1. Go to the **Commits** tab
+2. Look for commits by **Abu-afk**
+3. Key commits:
+   - `Add filtering, sorting, pagination, bulk approve and summary`
+   - `Remove .env from tracking and add to gitignore`
+   - `Fix vite config port to 5001`
+   - `Merge main into ui-updates and resolve conflicts`
 
 ---
 
-## Setup Instructions
+### What I Built
+
+#### 1. Pending Claims — Filtering System
+**File:** `frontend/src/pages/manager/PendingClaims.tsx`
+
+Added a full filtering system for the manager's pending claims view:
+- Search by employee name or description
+- Filter by minimum and maximum amount (£)
+- Filter by date range (from/to date)
+- Clear all filters button
+
+#### 2. Pending Claims — Sorting
+**File:** `frontend/src/pages/manager/PendingClaims.tsx`
+
+Added sortable columns to the pending claims table:
+- Sort by employee name (A-Z / Z-A)
+- Sort by submitted date (newest/oldest)
+- Sort by total amount (high/low)
+- Sort by status
+- Visual arrows showing current sort direction (↑ ↓ ↕)
+
+#### 3. Pending Claims — Pagination
+**File:** `frontend/src/pages/manager/PendingClaims.tsx`
+
+Added pagination to the pending claims list:
+- Shows 10 claims per page
+- Previous/Next buttons
+- Page number buttons
+- Shows "Showing X–Y of Z" count
+
+#### 4. Bulk Approve
+**File:** `frontend/src/pages/manager/PendingClaims.tsx`
+
+Added ability to approve multiple claims at once:
+- Checkbox on each claim row
+- Select all checkbox in header
+- Green bulk approve bar appears when claims are selected
+- Shows count of selected claims
+- Approves all selected claims in one click
+
+#### 5. Claims Summary Dashboard
+**File:** `frontend/src/pages/Dashboard.tsx`
+
+Added a weekly summary card to the manager dashboard showing:
+- Number of claims pending review (yellow)
+- Number of claims approved this week (green)
+- Number of claims rejected this week (red)
+- Total monetary value of pending claims (green)
+- Only visible to LINE_MANAGER and FINANCE_OFFICER roles
+
+#### 6. Security Fix — .env Protection
+**File:** `.gitignore`
+
+Added `.env` and `backend/.env` to `.gitignore` to prevent database credentials from being exposed on GitHub.
+
+#### 7. Test Data — Seed File
+**File:** `backend/prisma/seed.ts`
+
+Updated the seed file to include 5 realistic test claims:
+- 3 pending claims (different amounts and dates)
+- 1 approved claim with approval decision
+- 1 rejected claim with rejection reason
+
+---
+
+## How to Run the Project
 
 ### Prerequisites
+- Node.js
+- PostgreSQL database
 
-- Node.js 18+
-
-No database installation required — data is stored in `backend/data/*.txt` files.
-
----
-
-### 1. Backend
-
+### Setup
 ```bash
+# Clone the repo
+git clone https://github.com/Abu-afk/fdm-approve-reject.git
+
+# Backend setup
 cd backend
-
-# Install dependencies
 npm install
-
-# Copy and configure environment
-cp .env.example .env
-# Edit .env — set JWT_SECRET (DATABASE_URL is no longer needed)
-
-# Start dev server (port 5001)
+# Create .env file with your database credentials:
+# DATABASE_URL="postgresql://postgres:yourpassword@localhost:5432/fdm_expenses"
+# JWT_SECRET="fdm-expenses-secret-key-2024"
+# PORT=5001
+npx prisma db push
+npm run db:seed
 npm run dev
-```
 
----
-
-### 3. Frontend
-
-```bash
+# Frontend setup (new terminal)
 cd frontend
-
-# Install dependencies
 npm install
-
-# Start dev server (port 3000)
 npm run dev
 ```
 
-Open **http://localhost:3000**
+### Demo Accounts
+| Role | Email | Password |
+|------|-------|----------|
+| Employee | employee@fdm.com | password123 |
+| Line Manager | manager@fdm.com | password123 |
+| Finance Officer | finance@fdm.com | password123 |
 
 ---
 
-## Demo Accounts
-
-All accounts use password: **`password123`**
-
-| Role | Email |
-|------|-------|
-| Employee | employee@fdm.com |
-| Line Manager | manager@fdm.com |
-| Finance Officer | finance@fdm.com |
+## Technologies Used
+- React 18 + TypeScript + Vite (Frontend)
+- Node.js + Express + TypeScript (Backend)
+- PostgreSQL + Prisma ORM (Database)
+- JWT Authentication
 
 ---
 
-## API Routes
-
-### Auth
-| Method | Path | Description |
-|--------|------|-------------|
-| POST | `/api/auth/login` | Login |
-
-### Claims (Employee)
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `/api/claims` | Get my claims |
-| POST | `/api/claims` | Create draft |
-| GET | `/api/claims/:id` | Get claim detail |
-| PUT | `/api/claims/:id` | Update draft |
-| DELETE | `/api/claims/:id` | Delete draft |
-| POST | `/api/claims/:id/submit` | Submit claim |
-| POST | `/api/claims/:id/withdraw` | Withdraw claim |
-| POST | `/api/claims/:id/items` | Add expense item |
-| PUT | `/api/claims/items/:id` | Update item |
-| DELETE | `/api/claims/items/:id` | Delete item |
-| POST | `/api/claims/items/:id/receipts` | Upload receipt |
-| DELETE | `/api/claims/receipts/:id` | Delete receipt |
-
-### Manager
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `/api/manager/claims` | Pending (submitted) claims |
-| GET | `/api/manager/claims/:id` | Claim detail |
-| POST | `/api/manager/claims/:id/approve` | Approve |
-| POST | `/api/manager/claims/:id/reject` | Reject (comment required) |
-| POST | `/api/manager/claims/:id/request-changes` | Request changes (comment required) |
-
-### Finance
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `/api/finance/claims` | Approved claims |
-| GET | `/api/finance/claims/:id` | Claim detail |
-| POST | `/api/finance/claims/:id/reimburse` | Process reimbursement |
-
----
-
-## Claim Lifecycle
-
-<p align="center">
-  <img src="assets/lifecycle.svg" alt="Claim Lifecycle" width="860"/>
-</p>
-
----
-
-## Business Rules
-
-- A claim must have at least one expense item to be submitted
-- Every expense item must have at least one receipt before submission
-- Only `SUBMITTED` claims can be approved, rejected, or sent back for changes
-- Only `APPROVED` claims can be processed by Finance
-- Claims can only be withdrawn before approval
-- Employees can only view and manage their own claims
-
----
-
-## Environment Variables
-
-```env
-# backend/.env
-JWT_SECRET="change-this-to-a-long-random-string"
-PORT=5001
-FRONTEND_URL="http://localhost:3000"
-```
-## Getting Started
-
-### Prerequisites
-- [Node.js](https://nodejs.org/) (v18+)
-
-No database setup needed.
-
-### Installation
-
-1. **Clone the repository**
-```bash
-   git clone https://github.com/ZIZO-M/FDM-Expenses.git
-   cd FDM-Expenses
-```
-
-2. **Set up the backend**
-```bash
-   cd backend
-   npm install
-```
-   Create a `.env` file in the `backend/` folder:
-```
-   JWT_SECRET="change-this-to-a-long-random-string"
-   PORT=5001
-   FRONTEND_URL="http://localhost:3000"
-```
-
-3. **Set up the frontend**
-```bash
-   cd ../frontend
-   npm install
-```
-
-4. **Run the app**
-
-   In one terminal (backend):
-```bash
-   cd backend
-   npm run dev
-```
-   In another terminal (frontend):
-```bash
-   cd frontend
-   npm run dev
-```
-
-5. **Open your browser**
-```
-   http://localhost:3000
-```
+*Queen Mary University of London — ECS506U Software Engineering Practice*
+*Student ID: 230332195*
